@@ -1,0 +1,102 @@
+:root {
+  --bg: #0f1419;
+  --panel: #1a2332;
+  --text: #e7ecf3;
+  --muted: #8b9bb4;
+  --accent: #3d8bfd;
+  --su: #2ecc71;
+  --mu: #f1c40f;
+  --art: #e74c3c;
+  --none: #7f8c8d;
+  --border: #2a3548;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+header {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+header h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+.muted { color: var(--muted); margin: 0.25rem 0 0; font-size: 0.85rem; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 70px);
+}
+aside {
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  padding: 0.75rem;
+  overflow-y: auto;
+  max-height: calc(100vh - 70px);
+}
+aside h2 { margin: 0 0 0.5rem; font-size: 0.95rem; }
+.toolbar, .type-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+  align-items: center;
+}
+.type-bar span { font-size: 0.8rem; color: var(--muted); margin-right: 0.25rem; }
+button {
+  background: #243044;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+button:hover { border-color: var(--accent); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+#group-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+#group-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.35rem;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-size: 0.82rem;
+}
+#group-list li:hover { background: #243044; }
+#group-list li.active { border-color: var(--accent); background: #1e2a3d; }
+#group-list li.selected { background: #1a3a5c; }
+.badge {
+  font-size: 0.7rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+.badge.su { background: var(--su); color: #111; }
+.badge.mu { background: var(--mu); color: #111; }
+.badge.art { background: var(--art); color: #fff; }
+.badge.none { background: var(--none); color: #fff; }
+
+.plots {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+#wave-plot, #xcorr-plot, #raster-plot {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-height: 220px;
+}

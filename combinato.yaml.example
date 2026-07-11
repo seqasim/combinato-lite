@@ -1,0 +1,8 @@
+# Example combinato.yaml — copy to your working directory or set COMBINATO_CONFIG
+nFeatures: 10
+RecursiveDepth: 1
+threshold_factor: 5.0
+MaxDistMatchGrouping: 1.8
+LogLevel: INFO
+plot: false
+plotTemps: false
