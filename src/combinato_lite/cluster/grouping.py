@@ -12,7 +12,7 @@ from ..constants import CLID_UNMATCHED, GROUP_ART, GROUP_NOCLASS, TYPE_ART, TYPE
 from ..io.h5store import DataStore
 from .dist import distance_groups
 
-logger = logging.getLogger("combinato.cluster.grouping")
+logger = logging.getLogger("combinato_lite.cluster.grouping")
 
 
 def create_groups(spikes, classes, clids, sign):

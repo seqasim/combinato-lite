@@ -9,7 +9,7 @@ import numpy as np
 from ..config import get_config
 from ..constants import CLID_UNMATCHED
 
-logger = logging.getLogger("combinato.cluster.dist")
+logger = logging.getLogger("combinato_lite.cluster.dist")
 
 
 def distances_euclidean(all_spikes, templates):

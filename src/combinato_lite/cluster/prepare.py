@@ -11,7 +11,7 @@ import numpy as np
 from ..config import get_config
 from ..io.h5store import DataStore, create_session
 
-logger = logging.getLogger("combinato.cluster.prepare")
+logger = logging.getLogger("combinato_lite.cluster.prepare")
 
 
 def make_arguments(

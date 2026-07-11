@@ -11,7 +11,7 @@ import numpy as np
 
 from ..constants import GROUP_ART, GROUP_NOCLASS, SIGNS, TYPE_ART, TYPE_MU, TYPE_NO
 
-logger = logging.getLogger("combinato.io.h5store")
+logger = logging.getLogger("combinato_lite.io.h5store")
 
 
 class DataStore:

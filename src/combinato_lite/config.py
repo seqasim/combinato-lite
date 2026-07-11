@@ -122,8 +122,9 @@ def load_config(
     Load config from defaults, optional YAML file, env vars, then explicit overrides.
 
     Search order for YAML (first found wins if path is None):
-      1. ./combinato.yaml
-      2. $COMBINATO_CONFIG
+      1. $COMBINATO_CONFIG
+      2. ./combinato_lite.yaml
+      3. ./combinato.yaml
     """
     cfg = CombinatoConfig()
 
@@ -134,8 +135,11 @@ def load_config(
         env_path = os.environ.get("COMBINATO_CONFIG")
         if env_path and Path(env_path).is_file():
             yaml_path = Path(env_path)
-        elif Path("combinato.yaml").is_file():
-            yaml_path = Path("combinato.yaml")
+        else:
+            for candidate in ("combinato_lite.yaml", "combinato.yaml"):
+                if Path(candidate).is_file():
+                    yaml_path = Path(candidate)
+                    break
 
     if yaml_path is not None and yaml_path.is_file():
         with open(yaml_path, encoding="utf-8") as fh:

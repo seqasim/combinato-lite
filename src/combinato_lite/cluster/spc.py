@@ -17,7 +17,7 @@ import numpy as np
 
 from ..config import get_config
 
-logger = logging.getLogger("combinato.cluster.spc")
+logger = logging.getLogger("combinato_lite.cluster.spc")
 
 EXT_CL = (".dg_01", ".dg_01.lab")
 EXT_TMP = (".mag", ".mst11.edges", ".param", "_tmp_data", "_cluster.run")
@@ -85,7 +85,7 @@ def resolve_spc_binary(explicit: Optional[str] = None) -> Path:
 
     # Prefer package data
     try:
-        pkg = resources.files("combinato.cluster.spc_bin")
+        pkg = resources.files("combinato_lite.cluster.spc_bin")
         candidate = pkg.joinpath(name)
         # resources may return a Traversable; materialize if needed
         if hasattr(candidate, "is_file") and candidate.is_file():

@@ -8,7 +8,7 @@ import numpy as np
 
 from ..config import get_config
 
-logger = logging.getLogger("combinato.cluster.artifacts")
+logger = logging.getLogger("combinato_lite.cluster.artifacts")
 TOLERANCE = 10
 
 

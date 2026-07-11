@@ -1,8 +1,10 @@
-# Example combinato.yaml — copy to your working directory or set COMBINATO_CONFIG
+# Example config — copy to combinato_lite.yaml (or combinato.yaml) in your working directory,
+# or point COMBINATO_CONFIG at this file.
 nFeatures: 10
 RecursiveDepth: 1
 threshold_factor: 5.0
 MaxDistMatchGrouping: 1.8
+max_nspk_session: 20000
 LogLevel: INFO
 plot: false
 plotTemps: false

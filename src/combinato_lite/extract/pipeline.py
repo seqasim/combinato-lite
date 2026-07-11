@@ -17,7 +17,7 @@ from ..io.ncs import NCS_SAMPLES_PER_REC, NcsFile
 from .detect import extract_spikes
 from .filters import DefaultFilter
 
-logger = logging.getLogger("combinato.extract.pipeline")
+logger = logging.getLogger("combinato_lite.extract.pipeline")
 
 SAMPLES_PER_REC = NCS_SAMPLES_PER_REC
 

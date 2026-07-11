@@ -9,7 +9,7 @@ import numpy as np
 from ..config import get_config
 from .interpolate import align, clean, downsample, upsample
 
-logger = logging.getLogger("combinato.extract.detect")
+logger = logging.getLogger("combinato_lite.extract.detect")
 
 
 def extract_spikes(data, times, timestep, filt, cfg=None):

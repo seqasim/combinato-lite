@@ -7,7 +7,7 @@ import logging
 import numpy as np
 from scipy.io import loadmat
 
-logger = logging.getLogger("combinato.io.matfile")
+logger = logging.getLogger("combinato_lite.io.matfile")
 
 DEFAULT_MAT_SR = 24000
 

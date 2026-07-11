@@ -16,7 +16,7 @@ from .artifacts import find_artifacts
 from .dist import distances_euclidean, get_means
 from .grouping import group_sorting
 
-logger = logging.getLogger("combinato.cluster.combine")
+logger = logging.getLogger("combinato_lite.cluster.combine")
 
 COL_CLASS = 0
 COL_MATCH_TYPE = 2

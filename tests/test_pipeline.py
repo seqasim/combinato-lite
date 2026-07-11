@@ -9,15 +9,15 @@ import h5py
 import numpy as np
 import pytest
 
-from combinato.config import CombinatoConfig, load_config, set_config
-from combinato.constants import TYPE_MU, TYPE_SU
-from combinato.io.h5store import DataStore, SortingStore, create_session
-from combinato.cluster.features import wavelet_features
-from combinato.cluster.select_features import select_features
-from combinato.cluster.artifacts import artifact_score
-from combinato.gui.app import cross_correlogram, create_app
-from combinato.extract.filters import DefaultFilter
-from combinato.extract.detect import extract_spikes
+from combinato_lite.config import CombinatoConfig, load_config, set_config
+from combinato_lite.constants import TYPE_MU, TYPE_SU
+from combinato_lite.io.h5store import DataStore, SortingStore, create_session
+from combinato_lite.cluster.features import wavelet_features
+from combinato_lite.cluster.select_features import select_features
+from combinato_lite.cluster.artifacts import artifact_score
+from combinato_lite.gui.app import cross_correlogram, create_app
+from combinato_lite.extract.filters import DefaultFilter
+from combinato_lite.extract.detect import extract_spikes
 
 
 @pytest.fixture
@@ -36,7 +36,7 @@ def cfg():
 
 
 def test_load_config_yaml(tmp_path):
-    p = tmp_path / "combinato.yaml"
+    p = tmp_path / "combinato_lite.yaml"
     p.write_text("nFeatures: 7\nLogLevel: WARNING\n")
     c = load_config(path=p)
     assert c.nFeatures == 7
@@ -140,7 +140,7 @@ def _make_spike_file(path: Path, n_pos: int = 400) -> str:
 
 
 def test_spc_binary_resolves():
-    from combinato.cluster.spc import resolve_spc_binary
+    from combinato_lite.cluster.spc import resolve_spc_binary
 
     try:
         path = resolve_spc_binary()
@@ -151,10 +151,10 @@ def test_spc_binary_resolves():
 
 def test_e2e_sort_pipeline(tmp_path, cfg):
     """extract-like data → prepare → cluster → combine → group."""
-    from combinato.cluster.prepare import prepare_sessions
-    from combinato.cluster.sort import run_cluster_jobs
-    from combinato.cluster.combine import combine_sessions
-    from combinato.cluster.spc import resolve_spc_binary
+    from combinato_lite.cluster.prepare import prepare_sessions
+    from combinato_lite.cluster.sort import run_cluster_jobs
+    from combinato_lite.cluster.combine import combine_sessions
+    from combinato_lite.cluster.spc import resolve_spc_binary
 
     try:
         resolve_spc_binary()

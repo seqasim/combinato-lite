@@ -19,7 +19,7 @@ from .features import wavelet_features
 from .select_features import select_features
 from .spc import Clusterer, get_clusterer
 
-logger = logging.getLogger("combinato.cluster.sort")
+logger = logging.getLogger("combinato_lite.cluster.sort")
 
 
 def handle_random_seed(seed=None) -> float:
@@ -203,17 +203,36 @@ def run_cluster_jobs(
     jobs: list[tuple[str, str, str]],
     single: bool = False,
     seed: Optional[float] = None,
+    n_workers: Optional[int] = None,
 ):
     """
+    Run SPC clustering jobs in parallel.
+
     jobs: list of (datafile, sign, session_path)
+
+    Parallelism is across *sessions* (each session is one SPC run). Use
+    ``n_workers`` to cap processes; default is ``min(cpu_count, n_jobs)``.
+    Pass ``single=True`` or ``n_workers=1`` for serial execution (useful for
+    debugging or when submitting one job per SLURM task).
     """
     seed = handle_random_seed(seed)
     payload = [(j[0], j[1], j[2], seed) for j in jobs]
-    logger.info("Starting %d clustering jobs", len(payload))
-    if single or len(payload) == 1:
+    if single:
+        workers = 1
+    elif n_workers is not None:
+        workers = max(1, n_workers)
+    else:
+        workers = min(os.cpu_count() or 1, len(payload))
+    workers = min(workers, len(payload)) if payload else 1
+
+    logger.info(
+        "Starting %d clustering jobs with %d worker process(es)",
+        len(payload),
+        workers,
+    )
+    if workers == 1 or len(payload) <= 1:
         for p in payload:
             _sort_helper(p)
     else:
-        n = min(os.cpu_count() or 1, len(payload))
-        with ProcessPoolExecutor(max_workers=n) as pool:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
             list(pool.map(_sort_helper, payload))

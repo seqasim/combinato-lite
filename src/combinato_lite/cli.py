@@ -15,7 +15,11 @@ from .logging_config import configure_logging
 
 app = typer.Typer(
     name="combinato",
-    help="Combinato-Lite: lightweight, portable spike sorting.",
+    help=(
+        "Combinato-Lite: lightweight, portable spike sorting.\n\n"
+        "Parallelism: extract and cluster use multiple processes by default. "
+        "See --workers / -j on those commands, and the README 'Parallelization' section."
+    ),
     no_args_is_help=True,
 )
 
@@ -33,7 +37,10 @@ def _bootstrap(config: Optional[Path], verbose: bool):
 @app.callback()
 def main(
     config: Optional[Path] = typer.Option(
-        None, "--config", "-c", help="Path to combinato.yaml"
+        None,
+        "--config",
+        "-c",
+        help="Path to combinato_lite.yaml / combinato.yaml",
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v"),
 ):
@@ -47,13 +54,27 @@ def extract(
     matfile: Optional[Path] = typer.Option(None, "--matfile", help="MATLAB .mat file"),
     h5: bool = typer.Option(False, "--h5", help="Treat --files as continuous HDF5"),
     destination: str = typer.Option("", "--destination", "-d"),
-    workers: int = typer.Option(4, "--workers", "-j"),
+    workers: int = typer.Option(
+        4,
+        "--workers",
+        "-j",
+        help=(
+            "Parallel worker processes for extraction chunks "
+            "(one process per time-block / channel job). Default: 4. "
+            "On a cluster node, set this to the number of CPUs you reserved."
+        ),
+    ),
     scale_factor: float = typer.Option(1.0, "--matfile-scale-factor"),
     refscheme: Optional[Path] = typer.Option(
         None, "--refscheme", help="CSV: filename;reference"
     ),
 ):
-    """Extract spikes from .ncs, .mat, or continuous HDF5."""
+    """
+    Extract spikes from .ncs, .mat, or continuous HDF5.
+
+    Large recordings are split into time blocks; --workers runs those blocks
+    in parallel processes.
+    """
     from .extract import extract_files, extract_h5, extract_matfile
 
     if matfile is not None:
@@ -90,11 +111,24 @@ def prepare(
     datafile: Path = typer.Option(..., "--datafile", help="data_*.h5 spike file"),
     neg: bool = typer.Option(False, "--neg", help="Use negative spikes"),
     label: str = typer.Option("sort", "--label"),
-    max_nspk: Optional[int] = typer.Option(None, "--max-nspk"),
+    max_nspk: Optional[int] = typer.Option(
+        None,
+        "--max-nspk",
+        help=(
+            "Max spikes per clustering session (default from config, usually 20000). "
+            "Long recordings are split into multiple sessions; each session is a "
+            "parallelizable clustering job."
+        ),
+    ),
     start: Optional[int] = typer.Option(None, "--start"),
     stop: Optional[int] = typer.Option(None, "--stop"),
 ):
-    """Create clustering session folders from a spike data file."""
+    """
+    Create clustering session folders from a spike data file.
+
+    Writes a job list (sort_<sign>_<label>.txt) that combinato cluster can run
+    in parallel across sessions.
+    """
     from .cluster.prepare import prepare_sessions
 
     sign = "neg" if neg else "pos"
@@ -111,7 +145,10 @@ def prepare(
     with open(outfname, "a", encoding="utf-8") as outf:
         for name, sgn, ses in sessions:
             outf.write(f"{name} {sgn} {ses}\n")
-    rprint(f"[green]Prepared {len(sessions)} sessions[/green] → {outfname}")
+    rprint(
+        f"[green]Prepared {len(sessions)} session(s)[/green] → {outfname} "
+        f"(run with: combinato cluster --jobs {outfname} -j N)"
+    )
 
 
 @app.command()
@@ -119,10 +156,29 @@ def cluster(
     datafile: Optional[Path] = typer.Option(None, "--datafile"),
     sessions: Optional[list[str]] = typer.Option(None, "--sessions"),
     jobs: Optional[Path] = typer.Option(None, "--jobs", help="Job list file"),
-    single: bool = typer.Option(False, "--single", help="No multiprocessing"),
+    workers: Optional[int] = typer.Option(
+        None,
+        "--workers",
+        "-j",
+        help=(
+            "Parallel worker processes (one session per process). "
+            "Default: all CPUs, capped by number of jobs. "
+            "Use -j 1 or --single for serial / one-SLURM-task-per-session workflows."
+        ),
+    ),
+    single: bool = typer.Option(
+        False,
+        "--single",
+        help="Force serial execution (same as -j 1).",
+    ),
     rng: Optional[float] = typer.Option(None, "--rng", help="Random seed"),
 ):
-    """Run SPC clustering on prepared sessions."""
+    """
+    Run SPC clustering on prepared sessions.
+
+    Parallelizes across sessions listed in --jobs (or --sessions). Each worker
+    runs one SPC binary on one session folder.
+    """
     from .cluster.sort import run_cluster_jobs
 
     joblist: list[tuple[str, str, str]] = []
@@ -139,8 +195,8 @@ def cluster(
     else:
         raise typer.BadParameter("Specify --jobs or --datafile and --sessions")
 
-    run_cluster_jobs(joblist, single=single, seed=rng)
-    rprint(f"[green]Clustered {len(joblist)} jobs[/green]")
+    run_cluster_jobs(joblist, single=single, seed=rng, n_workers=workers)
+    rprint(f"[green]Clustered {len(joblist)} job(s)[/green]")
 
 
 @app.command()
@@ -150,7 +206,7 @@ def combine(
     label: str = typer.Option(..., "--label"),
     no_grouping: bool = typer.Option(False, "--no-grouping"),
 ):
-    """Concatenate session sortings and optionally group clusters."""
+    """Concatenate session sortings and optionally group clusters (single-process)."""
     from .cluster.combine import combine_sessions
 
     out = combine_sessions(
@@ -167,9 +223,23 @@ def sort(
     datafile: Path = typer.Option(..., "--datafile"),
     neg: bool = typer.Option(False, "--neg"),
     label: str = typer.Option("simple", "--label"),
+    workers: Optional[int] = typer.Option(
+        None,
+        "--workers",
+        "-j",
+        help=(
+            "Worker processes for the clustering stage when prepare creates "
+            "multiple sessions. Default: all CPUs. Use -j 1 for serial."
+        ),
+    ),
     rng: Optional[float] = typer.Option(None, "--rng"),
 ):
-    """One-shot: prepare → cluster → combine → group for a single file."""
+    """
+    One-shot: prepare → cluster → combine → group for a single file.
+
+    If the recording is split into several sessions, clustering runs those
+    sessions in parallel (--workers).
+    """
     from .cluster.combine import combine_sessions
     from .cluster.prepare import prepare_sessions
     from .cluster.sort import run_cluster_jobs
@@ -183,7 +253,7 @@ def sort(
         raise typer.Exit(0)
 
     jobs = [(name, sgn, ses) for name, sgn, ses in sessions]
-    run_cluster_jobs(jobs, single=True, seed=rng)
+    run_cluster_jobs(jobs, seed=rng, n_workers=workers)
 
     label_full = f"sort_{sign}_{label}"
     ses_names = [os.path.basename(ses) for _, _, ses in sessions]
@@ -200,7 +270,7 @@ def gui(
     host: str = typer.Option("127.0.0.1", "--host"),
     port: int = typer.Option(8765, "--port"),
 ):
-    """Launch the local web curation GUI."""
+    """Launch the local web curation GUI (single-process)."""
     from .gui.app import run_gui
 
     sort_path = sorting

@@ -16,7 +16,7 @@ from pydantic import BaseModel
 from ..constants import TYPE_ART, TYPE_MU, TYPE_NAMES, TYPE_NO, TYPE_SU
 from ..io.h5store import DataStore, SortingStore
 
-logger = logging.getLogger("combinato.gui")
+logger = logging.getLogger("combinato_lite.gui")
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 

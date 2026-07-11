@@ -13,7 +13,7 @@ def configure_logging(cfg: CombinatoConfig | None = None) -> None:
     """Configure root logger for combinato-* modules."""
     cfg = cfg or get_config()
     level = getattr(logging, str(cfg.LogLevel).upper(), logging.INFO)
-    root = logging.getLogger("combinato")
+    root = logging.getLogger("combinato_lite")
     root.handlers.clear()
     root.setLevel(level)
     root.propagate = False
@@ -29,7 +29,7 @@ def configure_logging(cfg: CombinatoConfig | None = None) -> None:
     if cfg.LogToFile:
         log_dir = Path(cfg.LogDir) if cfg.LogDir else Path.cwd()
         log_dir.mkdir(parents=True, exist_ok=True)
-        fh = logging.FileHandler(log_dir / "combinato.log", mode="a")
+        fh = logging.FileHandler(log_dir / "combinato_lite.log", mode="a")
         fh.setFormatter(formatter)
         fh.setLevel(level)
         root.addHandler(fh)
